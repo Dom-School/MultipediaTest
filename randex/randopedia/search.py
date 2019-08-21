@@ -5,7 +5,7 @@ from random import randint
 from randomwordgenerator import randomwordgenerator as r_backup
 from random_word import RandomWords
 
-URBAN_URL = ''
+
 MERRIAM_URL = ''
 
 result = {}
@@ -13,13 +13,21 @@ result = {}
 
 def info_source(search=" "):
 
+    result = {}
+
     if search == " ":
         search = get_word()
 
-    return wikipedia_info(search)
+    wiki_dic = wiki_info(search)
+    result.update(wiki_dic)
+
+    urban_dic = urban_info(search)
+    result.update(urban_dic)
+
+    return result
 
 
-def wikipedia_info(search, pageid=0):
+def wiki_info(search, pageid=0):
     """ Returns a dictionary with the wikipedia title and main text from the given search term """
 
     wiki_result = {"wiki_title": "", "wiki_text": ""}
@@ -47,7 +55,8 @@ def wikipedia_info(search, pageid=0):
         'pageid': main_id,
         'format': "json"
     }
-    req = requests.get(url=WIKI_URL, params=PARAMS)
+    req = requests.get(url=WIKI_URL, params=PARAMS, headers={
+                       "User-Agent": "Mozilla/5.0"})
     check_url(req)
     DATA = req.json()
 
@@ -55,7 +64,7 @@ def wikipedia_info(search, pageid=0):
     title = DATA["parse"]["title"]
     wiki_result["wiki_title"] = title
 
-    print(title)
+    print("Wiki title: " + wiki_result["wiki_title"])
 
     # Get the main html from the json url
     parser_output = DATA["parse"]["text"]["*"]
@@ -63,10 +72,21 @@ def wikipedia_info(search, pageid=0):
     main_text = soup.find(class_="mw-parser-output")
 
     # If the phrase " refer to" is any of the p tags the wikipedia page
-    # the page is ambiguous so the function is recalled with a different page id"
+    # the page is ambiguous so the function is recalled with the most relevent option"
     for p in main_text.find_all('p'):
         if " refer to:" in p.text:
-            return wikipedia_info(search, randint(1, len(pageids)-1))
+            for ul in main_text.find_all('ul'):
+                if "#" not in ul.li.a['href']:
+                    new_search = ul.li.a['href']
+                    break
+            req = requests.get("https://en.wikipedia.org" +
+                               new_search, headers={"User-Agent": "Mozilla/5.0"})
+            check_url(req)
+            soup = bs4.BeautifulSoup(req.text, "html.parser")
+            wiki_result["wiki_title"] = soup.find(
+                "h1", id="firstHeading").text
+            print("Wiki title: " + wiki_result["wiki_title"])
+            main_text = soup.find(class_="mw-parser-output")
 
     # Loop through the p tags and get the main information
     tags = main_text.children
@@ -83,8 +103,32 @@ def wikipedia_info(search, pageid=0):
         # When a new headline is found return the result
         if tag.name == 'h2':
             wiki_result["wiki_text"] = wiki_result["wiki_text"].strip()
-            # print(wiki_result)
             return wiki_result
+
+
+def urban_info(search):
+    urban_result = {"urban_title": "", "urban_text": ""}
+    URBAN_URL = 'http://api.urbandictionary.com/v0/define?term='
+
+    req = requests.get(URBAN_URL+search)
+    check_url(req)
+    DATA = req.json()
+
+    if DATA['list'] == []:
+        return {}
+
+    title = DATA['list'][0]['word'].title()
+    print("Urban title: " + title)
+    urban_result["urban_title"] = title
+
+    definition = DATA['list'][0]['definition']
+    useless_chars = ['[', ']', '\n', '\r']
+    for char in useless_chars:
+        definition = definition.replace(char, "")
+
+    urban_result["urban_text"] = definition
+
+    return urban_result
 
 
 def get_word():
@@ -103,7 +147,7 @@ def get_word():
         try:
             wiki_res.raise_for_status()
             return word
-        except Exception as exc: 
+        except Exception as exc:
             print('There was a problem: %s' % (exc))
             continue
         """
@@ -120,4 +164,5 @@ def check_url(req):
         return None
 
 
-print(wikipedia_info("queen"))
+# print(info_source(get_word()))
+# print(info_source("triploid"))
