@@ -3,15 +3,31 @@
 
 
 <div class="col-lg-12 text-center">
+    <h1 class="mt-2">Your word: {{ original_search }}</h1>
+</div>
+
+<div class="row">
+    <h2 class="mt-2">{{ wiki_title }}</h2>
+    <div class="row">
+        <p class="lead">{{ wiki_text }}</p>
+    </div>
+</div>
+<div class="row">
+    <h2 class="mt-2">{{ urban_title }}</h2>
+    <div class="row">
+        <p class="lead">{{ urban_text }}</p>
+    </div>
+</div>
+<div class="row">
+    <h2 class="mt-2">Wiktionary definitions:</h2>
+    <div class="row">
+        {% for definition in wiktionary_definitions %}
+        <p class="lead">{{ definition }}</p>
+        {% endfor %}
+    </div>
+</div>
+<div class="col-lg-12 text-center">
     <a class="btn btn btn-danger mt-3" href="{% url 'random_page' word=' ' %}" role="button">Next Random Article --></a>
 </div>
 
-<div class="col">
-    <h1 class="mt-2">{{ wiki_title }}</h1>
-    <p class="lead">{{ wiki_text }}</p>
-</div>
-<div class="col">
-    <h1 class="mt-2">{{ urban_title }}</h1>
-    <p class="lead">{{ urban_text }}</p>
-</div>
 {% endblock %}

@@ -1,14 +1,13 @@
 import requests
 import bs4
 import json
+import re
 from random import randint
+from wiktionaryparser import WiktionaryParser
 from randomwordgenerator import randomwordgenerator as r_backup
 from random_word import RandomWords
 
-
-MERRIAM_URL = ''
-
-result = {}
+WORDNIK_KEY = 'wlaurbdjhhd8uql2fa84x3skvw8g1uw5ffogaozp7sya3zg90'
 
 
 def info_source(search=" "):
@@ -18,12 +17,25 @@ def info_source(search=" "):
     if search == " ":
         search = get_word()
 
+    result["original_search"] = search
+    result["no_result"] = False
+
     wiki_dic = wiki_info(search)
     result.update(wiki_dic)
 
     urban_dic = urban_info(search)
     result.update(urban_dic)
 
+    #webster_dic = webster_info(search)
+    # result.update(webster_dic)
+    wiktionary_dic = wiktionary_info(search)
+    result.update(wiktionary_dic)
+
+    print(result)
+
+    if len(result) <= 2:
+        result["no_result"] = True
+        return result
     return result
 
 
@@ -46,6 +58,8 @@ def wiki_info(search, pageid=0):
     req = requests.get(url=WIKI_URL, params=PARAMS)
     check_url(req)
     DATA = req.json()
+    if DATA["query"]["search"] == []:
+        return {}
     pageids = [sr["pageid"] for sr in DATA["query"]["search"]]
     main_id = pageids[pageid]
 
@@ -108,14 +122,20 @@ def wiki_info(search, pageid=0):
 
 def urban_info(search):
     urban_result = {"urban_title": "", "urban_text": ""}
-    URBAN_URL = 'http://api.urbandictionary.com/v0/define?term='
+    URBAN_API_URL = 'http://api.urbandictionary.com/v0/define?term='
+    URBAN_URL = 'https://www.urbandictionary.com/define.php?term='
 
-    req = requests.get(URBAN_URL+search)
+    req = requests.get(URBAN_API_URL+search)
     check_url(req)
     DATA = req.json()
 
     if DATA['list'] == []:
-        return {}
+        req = requests.get(URBAN_URL + search)
+        soup = bs4.BeautifulSoup(req.text, "html.parser")
+        if not soup.find(class_="try-these"):
+            return {}
+        close_word = soup.find(class_="try-these").find("a").text
+        return urban_info(close_word)
 
     title = DATA['list'][0]['word'].title()
     print("Urban title: " + title)
@@ -131,11 +151,28 @@ def urban_info(search):
     return urban_result
 
 
+def wiktionary_info(search):
+    wiktionary_result = {"wiktionary_definitions": []}
+
+    parser = WiktionaryParser()
+    DATA = parser.fetch(search)
+
+    for word in DATA:
+        for word_def in word['definitions']:
+            for defin in word_def['text'][1:]:
+                wiktionary_result["wiktionary_definitions"].append(defin)
+
+    # wiktionary_result["wiktionary_definitions"].append(DATA)
+
+    return wiktionary_result
+
+
 def get_word():
     while(True):
         try:
             # r.get_random_words(hasDictionaryDef="true", includePartOfSpeech="noun,verb", minCorpusCount=1, maxCorpusCount=10, minDictionaryCount=1, maxDictionaryCount=10, minLength=5, maxLength=10, sortBy="alpha", sortOrder="asc", limit=15)
-            word = RandomWords().get_random_word(hasDictionaryDef="true")
+            word = RandomWords().get_random_word(
+                hasDictionaryDef="true", includePartOfSpeech="noun")
         except Exception as exc:
             print('There was a problem: %s' % (exc))
             word = r_backup.generate_random_words(1)
@@ -161,8 +198,12 @@ def check_url(req):
         req.raise_for_status()
     except Exception as exc:
         print('There was a problem: %s' % (exc))
-        return None
+        return False
 
 
 # print(info_source(get_word()))
-# print(info_source("triploid"))
+# print(info_source("scoria"))
+# print(wiki_info("cobiron"))
+# print(urban_info("tinselly"))
+# print(webster_info("gum"))
+# print(wiktionary_info("gum"))

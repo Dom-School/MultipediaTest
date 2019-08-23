@@ -27,11 +27,12 @@ def random_page(request, word=" "):
 
     print(word)
     info = info_source(word)
-    
-    if info == None:
+
+    if info["no_result"]:
         return redirect('sorry_page', word=word)
-    
+
     return render(request, template_name, info)
+
 
 def sorry_page(request, word=None):
     template_name = 'randopedia/sorry_page.html'
@@ -39,8 +40,9 @@ def sorry_page(request, word=None):
     context = {
         "word": word,
     }
-    
+
     return render(request, template_name, context)
+
 
 """
 def blog_detail(request, pk):
