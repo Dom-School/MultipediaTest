@@ -16,20 +16,22 @@ def info_source(search=" "):
 
     if search == " ":
         search = get_word()
+        # If the random is plural recall the function as a singular word
+        non_plural = wiktionary_info(search, unplurify=True)
+        if non_plural != None:
+            return info_source(non_plural)
 
     result["original_search"] = search
     result["no_result"] = False
+
+    wiktionary_dic = wiktionary_info(search)
+    result.update(wiktionary_dic)
 
     wiki_dic = wiki_info(search)
     result.update(wiki_dic)
 
     urban_dic = urban_info(search)
     result.update(urban_dic)
-
-    #webster_dic = webster_info(search)
-    # result.update(webster_dic)
-    wiktionary_dic = wiktionary_info(search)
-    result.update(wiktionary_dic)
 
     print(result)
 
@@ -42,7 +44,8 @@ def info_source(search=" "):
 def wiki_info(search, pageid=0):
     """ Returns a dictionary with the wikipedia title and main text from the given search term """
 
-    wiki_result = {"wiki_title": "", "wiki_text": ""}
+    wiki_result = {"wiki_title": "", "wiki_text_brief": "", "wiki_text": []}
+
     WIKI_URL = "https://en.wikipedia.org/w/api.php"
     search_limit = 7
     pageids = []
@@ -78,6 +81,7 @@ def wiki_info(search, pageid=0):
     title = DATA["parse"]["title"]
     wiki_result["wiki_title"] = title
 
+    # Console Debug Teter Code
     print("Wiki title: " + wiki_result["wiki_title"])
 
     # Get the main html from the json url
@@ -99,6 +103,7 @@ def wiki_info(search, pageid=0):
             soup = bs4.BeautifulSoup(req.text, "html.parser")
             wiki_result["wiki_title"] = soup.find(
                 "h1", id="firstHeading").text
+            # Console Debug Teter Code
             print("Wiki title: " + wiki_result["wiki_title"])
             main_text = soup.find(class_="mw-parser-output")
 
@@ -111,12 +116,19 @@ def wiki_info(search, pageid=0):
             if tag.sup != None:
                 for i in range(len(tag.find_all("sup"))):
                     tag.sup.decompose()
-            wiki_result["wiki_text"] = wiki_result["wiki_text"] + \
-                tag.text + "\n"
+            # wiki_result["wiki_text"] = wiki_result["wiki_text"] +
+            wiki_result["wiki_text"].append(tag.text)
 
         # When a new headline is found return the result
         if tag.name == 'h2':
-            wiki_result["wiki_text"] = wiki_result["wiki_text"].strip()
+            # wiki_result["wiki_text"] = wiki_result["wiki_text"].strip().split('\n')
+
+            while '\n' in wiki_result["wiki_text"]:
+                wiki_result["wiki_text"].remove('\n')
+
+            wiki_result["wiki_text_brief"] = wiki_result["wiki_text"][0]
+            wiki_result["wiki_text"] = wiki_result["wiki_text"][1:]
+
             return wiki_result
 
 
@@ -138,6 +150,7 @@ def urban_info(search):
         return urban_info(close_word)
 
     title = DATA['list'][0]['word'].title()
+    # Console Debug Teter Code
     print("Urban title: " + title)
     urban_result["urban_title"] = title
 
@@ -151,18 +164,40 @@ def urban_info(search):
     return urban_result
 
 
-def wiktionary_info(search):
-    wiktionary_result = {"wiktionary_definitions": []}
+def wiktionary_info(search, unplurify=False):
+    wiktionary_result = {"wikti_defins_1": [],
+                         "wikti_defins_2": []}
+    definitions = []
 
     parser = WiktionaryParser()
     DATA = parser.fetch(search)
 
+    if unplurify:
+        if len(DATA) == 1 and len(DATA[0]['definitions']) == 1 and "plural of" in DATA[0]['definitions'][0]['text'][1]:
+            non_plural = DATA[0]['definitions'][0]['text'][1].replace(
+                "plural of ", "")
+            return non_plural
+        else:
+            return None
+
     for word in DATA:
         for word_def in word['definitions']:
             for defin in word_def['text'][1:]:
-                wiktionary_result["wiktionary_definitions"].append(defin)
+                definitions.append(defin)
 
-    # wiktionary_result["wiktionary_definitions"].append(DATA)
+    if definitions == []:
+        return {}
+
+    # Console Debug Teter Code
+    print("Wiktionary title: " + definitions[0])
+
+    defins_num = 3
+
+    if len(definitions) > defins_num:
+        wiktionary_result["wikti_defins_1"] = definitions[:defins_num]
+        wiktionary_result["wikti_defins_2"] = definitions[defins_num:]
+    else:
+        wiktionary_result["wikti_defins_1"] = definitions
 
     return wiktionary_result
 
@@ -202,8 +237,13 @@ def check_url(req):
 
 
 # print(info_source(get_word()))
-# print(info_source("scoria"))
-# print(wiki_info("cobiron"))
+# print(info_source("turtlenecks"))
+# print(wiki_info("cat"))
 # print(urban_info("tinselly"))
-# print(webster_info("gum"))
-# print(wiktionary_info("gum"))
+# print(wiktionary_info("turtlenecks"))
+# print(wiktionary_info("demi-jambe"))
+
+"""
+    if len(DATA) == 1 and len(DATA[0]['definitions']) == 1 and "plural of" in DATA[0]['definitions'][0]['text'][1]:
+        print(DATA[0]['definitions'][0]['text'][1].replace("plural of ", ""))
+"""

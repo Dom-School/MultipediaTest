@@ -1,33 +1,101 @@
 {% extends "base.html" %}
 {% block page_content %}
+{% load static %}
 
+<!-- Page Content -->
 
-<div class="col-lg-12 text-center">
-    <h1 class="mt-2">Your word: {{ original_search }}</h1>
-</div>
-
-<div class="row">
-    <h2 class="mt-2">{{ wiki_title }}</h2>
-    <div class="row">
-        <p class="lead">{{ wiki_text }}</p>
-    </div>
-</div>
-<div class="row">
-    <h2 class="mt-2">{{ urban_title }}</h2>
-    <div class="row">
-        <p class="lead">{{ urban_text }}</p>
-    </div>
-</div>
-<div class="row">
-    <h2 class="mt-2">Wiktionary definitions:</h2>
-    <div class="row">
-        {% for definition in wiktionary_definitions %}
-        <p class="lead">{{ definition }}</p>
-        {% endfor %}
-    </div>
-</div>
 <div class="col-lg-12 text-center">
     <a class="btn btn btn-danger mt-3" href="{% url 'random_page' word=' ' %}" role="button">Next Random Article --></a>
 </div>
+
+<div class="col-lg-12 text-center">
+    <h1>Results for: <i>{{ original_search }}</i></h1>
+</div>
+
+{% if wiki_title %}
+<!-- Slice -->
+<div class="card">
+    <div class="card-header">
+        <h3 class="float-left pt-2"> {{ wiki_title }}</h3>
+        <div class="float-right">
+            <img src="{% static 'wiki.png' %}" class="img-responsive center-block " alt="Wikipedia">
+        </div>
+    </div>
+    <div class="card-body">
+        <p class="card-text">{{ wiki_text_brief }}</p>
+        {% if wiki_text %}
+        <div class="collapse" id="collapseExample">
+            {% for p in wiki_text %}
+            <p class="card-text">{{ p | linebreaks}}</p>
+            {% endfor %}
+        </div>
+        <div class="text-center mt-4">
+            <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseExample"
+                aria-expanded="false" aria-controls="collapseExample">
+                Read More
+            </button>
+        </div>
+        {% endif %}
+    </div>
+</div>
+<!------------------->
+<hr>
+{% endif %}
+
+{% if wikti_defins_1 %}
+<!-- Slice -->
+<div class="card">
+    <div class="card-header">
+        <h3 class="float-left pt-2">Wiktionary definitions for {{ original_search }}:</h3>
+        <div class="float-right">
+            <img src="{% static 'wikti.png' %}" class="img-responsive center-block " alt="Wikipedia">
+        </div>
+    </div>
+    <div class="card-body">
+        <ul class="list-group list-group-flush">
+            {% for definition in wikti_defins_1 %}
+            <li class="list-group-item">
+                <h6>{{ definition }}</h6>
+            </li>
+            {% endfor %}
+            {% if wikti_defins_2 %}
+            <div class="collapse" id="collapseExample">
+                {% for definition in wikti_defins_2 %}
+                <li class="list-group-item">
+                    <h6>{{ definition }}</h6>
+                </li>
+                {% endfor %}
+            </div>
+            <div class="text-center mt-4">
+                <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseExample"
+                    aria-expanded="false" aria-controls="collapseExample">
+                    More definitions
+                </button>
+            </div>
+            {% endif %}
+        </ul>
+    </div>
+</div>
+<!------------------->
+<hr>
+{% endif %}
+
+
+
+{% if urban_title %}
+<!-- Slice -->
+<div class="card mb-4">
+    <div class="card-header text-white" style="background-color: #1d2439;">
+        <h3 class="float-left pt-2">{{ urban_title }}</h3>
+        <div class="float-right">
+            <img src="{% static 'urban.png' %}" class="img-responsive center-block " alt="Wikipedia">
+        </div>
+    </div>
+    <div class="card-body">
+        <p class="card-text">{{ urban_text }}</p>
+    </div>
+</div>
+<!-- /.row -->
+{% endif %}
 
 {% endblock %}

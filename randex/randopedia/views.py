@@ -2,7 +2,7 @@ from django.shortcuts import render, reverse, redirect, get_object_or_404
 from django.http import HttpResponse,  HttpResponseRedirect
 from .forms import SearchForm
 from .models import Page
-from .search import info_source
+from .search import info_source, get_word
 
 
 def home_page(request):
