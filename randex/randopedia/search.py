@@ -8,6 +8,7 @@ from randomwordgenerator import randomwordgenerator as r_backup
 from random_word import RandomWords
 
 WORDNIK_KEY = 'wlaurbdjhhd8uql2fa84x3skvw8g1uw5ffogaozp7sya3zg90'
+PIXABAY_KEY = '13414212-c2d4037cef2af0c68a1150841'
 
 
 def info_source(search=" "):
@@ -32,6 +33,9 @@ def info_source(search=" "):
 
     urban_dic = urban_info(search)
     result.update(urban_dic)
+
+    pixabay_dic = pixabay_info(search)
+    result.update(pixabay_dic)
 
     print(result)
 
@@ -113,6 +117,9 @@ def wiki_info(search, pageid=0):
 
         # Add main paragraphs and remove all the references([1],[2]...) from the text
         if tag.name == 'p':
+            # Edge case where a p tag holds a style tag
+            if tag.style != None:
+                continue
             if tag.sup != None:
                 for i in range(len(tag.find_all("sup"))):
                     tag.sup.decompose()
@@ -202,6 +209,35 @@ def wiktionary_info(search, unplurify=False):
     return wiktionary_result
 
 
+def pixabay_info(search):
+    pixabay_result = {"pixabay_images": []}
+    PIXABAY_URL = "https://pixabay.com/api/"
+    image_limit = 5
+
+    # Get a list of page ids from the API
+    PARAMS = {
+        'key': PIXABAY_KEY,
+        'q': search,
+        'image_type': "photo"
+    }
+
+    req = requests.get(url=PIXABAY_URL, params=PARAMS)
+    check_url(req)
+    DATA = req.json()
+
+    if DATA["hits"] == []:
+        return {}
+
+    if len(DATA["hits"]) < image_limit:
+        image_limit = len(DATA["hits"])
+
+    for i in range(image_limit):
+        pixabay_result["pixabay_images"].append(
+            DATA["hits"][i]["webformatURL"])
+
+    return pixabay_result
+
+
 def get_word():
     while(True):
         try:
@@ -238,12 +274,7 @@ def check_url(req):
 
 # print(info_source(get_word()))
 # print(info_source("turtlenecks"))
-# print(wiki_info("cat"))
+# print(wiki_info("monkey"))
 # print(urban_info("tinselly"))
 # print(wiktionary_info("turtlenecks"))
-# print(wiktionary_info("demi-jambe"))
-
-"""
-    if len(DATA) == 1 and len(DATA[0]['definitions']) == 1 and "plural of" in DATA[0]['definitions'][0]['text'][1]:
-        print(DATA[0]['definitions'][0]['text'][1].replace("plural of ", ""))
-"""
+print(pixabay_info("shootouts"))

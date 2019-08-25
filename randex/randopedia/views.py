@@ -7,9 +7,11 @@ from .search import info_source, get_word
 
 def home_page(request):
     template_name = 'randopedia/search_page.html'
+
     form = SearchForm(request.POST or None)
     if form.is_valid():
         return redirect('random_page', word=form.cleaned_data['search'])
+
     context = {
         "form": form,
     }
@@ -35,6 +37,7 @@ def random_page(request, word=" "):
 
 
 def sorry_page(request, word=None):
+
     template_name = 'randopedia/sorry_page.html'
 
     context = {

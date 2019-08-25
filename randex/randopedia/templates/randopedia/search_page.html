@@ -1,30 +1,27 @@
 {% extends "base.html" %}
 {% block page_content %}
 <style>
-input[type="text"], textarea {
-outline: none;
-box-shadow:none !important;
-border:1px solid #ccc !important;
-}
+  input[type="text"],
+  textarea {
+    outline: none;
+    box-shadow: none !important;
+    border: 1px solid #ccc !important;
+  }
 </style>
-    <div class="col-lg-12 text-center">
-        <h1 class="mt-5">Search for a word</h1>
-        <p class="lead">Complete with pre-defined file paths and responsive navigation!</p>
-        <form action="" method="POST">
-            {% csrf_token %}
+<div class="col-lg-12 text-center">
+  <h1 class="mt-5">Search for a word</h1>
+  <p class="lead">Complete with pre-defined file paths and responsive navigation!</p>
+  <form action="" method="POST">
+    {% csrf_token %}
 
-            {% for field in form.visible_fields %}
-            <div class="input-group mb-4">
-              {{ form.search }}
-              <div class="input-group-append">
-                <button  type="submit" class="btn btn-primary"><i class="fa fa-search"></i></button>
+    <div class="input-group mb-4">
+      {{ form.search }}
+      <div class="input-group-append">
+        <button type="submit" class="btn btn-primary"><i class="fa fa-search"></i></button>
 
-                <a class="btn btn btn-danger" href="{% url 'random_page' word=' ' %}" role="button">Random</a>
-              </div>
-            </div>
-            {% endfor %}
-        </form>
+        <a class="btn btn btn-danger" href="{% url 'random_page' word=' ' %}" role="button">Random</a>
+      </div>
     </div>
+  </form>
+</div>
 {% endblock %}
-
-
