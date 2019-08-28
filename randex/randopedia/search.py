@@ -76,7 +76,6 @@ def wiktionary_info(search, unplurify=False):
 
     # Console Debug Teter Code
     print("Wiktionary title: " + definitions[0])
-    print("Wiktionary title: " + wiktionary_result["wikti_url"])
 
     defins_num = 3
 
@@ -133,7 +132,6 @@ def wiki_info(search, pageid=0):
 
     # Console Debug Teter Code
     print("Wiki title: " + wiki_result["wiki_title"])
-    print(wiki_result["wiki_url"])
 
     # Get the main html from the json url
     parser_output = DATA["parse"]["text"]["*"]
@@ -214,7 +212,6 @@ def urban_info(search):
 
     # Console Debug Teter Code
     print("Urban title: " + urban_result["urban_title"])
-    print("Urban url: " + urban_result["urban_url"])
 
     definition = DATA['list'][0]['definition']
     example = DATA['list'][0]['example']
@@ -256,7 +253,6 @@ def pixabay_info(search):
         return {}
 
     pixabay_result["pixabay_url"] = PIXABAY_URL + search
-    print("Pixabay url: " + pixabay_result["pixabay_url"])
 
     if len(DATA["hits"]) < image_limit:
         image_limit = len(DATA["hits"])
