@@ -27,7 +27,9 @@
     <div class="card-header">
         <h3 class="float-left pt-3"> {{ wiki_title }}</h3>
         <div class="float-right">
-            <img src="{% static 'wiki.png' %}" class="img-responsive center-block " alt="Wikipedia">
+            <a href="{{ wiki_url }}" target="_blank">
+                <img src="{% static 'wiki.png' %}" class="img-responsive center-block " alt="Wikipedia">
+            </a>
         </div>
     </div>
     <div class="card-body">
@@ -58,7 +60,10 @@
     <div class="card-header">
         <h3 class="float-left pt-3">Wiktionary definitions for {{ original_search }}:</h3>
         <div class="float-right">
-            <img src="{% static 'wikti.png' %}" class="img-responsive center-block " alt="Wikipedia">
+            <a href="{{ wikti_url }}" target="_blank">
+                <img src="{% static 'wikti.png' %}" href="{{ wikti_url }}" class="img-responsive center-block "
+                    alt="Wikipedia">
+            </a>
         </div>
     </div>
     <div class="card-body">
@@ -96,11 +101,30 @@
     <div class="card-header text-white" style="background-color: #1d2439;">
         <h3 class="float-left pt-3">{{ urban_title }}</h3>
         <div class="float-right">
-            <img src="{% static 'urban.png' %}" class="img-responsive center-block " alt="Wikipedia">
+            <a href="{{ urban_url }}" target="_blank">
+                <img src="{% static 'urban.png' %}" href="{{ urban_url }}" class="img-responsive center-block "
+                    alt="Wikipedia">
+            </a>
         </div>
     </div>
     <div class="card-body">
-        <p class="card-text">{{ urban_text }}</p>
+        <p class="card-text">{{ urban_text_brief }}</p>
+        {% if not urban_text %}
+        <cite class="text-secondary">{{ urban_example | linebreaks }}</cite>
+        {% endif %}
+        {% if urban_text %}
+        <div class="collapse" id="urbanText">
+            {% for p in urban_text %}
+            <p class="card-text">{{ p | linebreaks}}</p>
+            {% endfor %}
+            <cite class="text-secondary">{{ urban_example | linebreaks }}</cite>
+        </div>
+        <div class="text-center mt-4">
+            <button class="btn btn-primary viewMore" type="button" data-toggle="collapse" data-target="#urbanText"
+                aria-expanded="false" aria-controls="urbanText">
+            </button>
+        </div>
+        {% endif %}
     </div>
 </div>
 {% endif %}
@@ -113,7 +137,9 @@
     <div class="card-header">
         <h3 class="float-left pt-3">Pixabay {{ original_search }} images:</h3>
         <div class="float-right">
-            <img src="{% static 'pixabay.png' %}" class="img-responsive center-block " alt="Wikipedia">
+            <a href="{{ pixabay_url }}" target="_blank">
+                <img src="{% static 'pixabay.png' %}" class="img-responsive center-block " alt="Wikipedia">
+            </a>
         </div>
     </div>
     <div class="card-body">

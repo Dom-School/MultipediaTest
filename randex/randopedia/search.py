@@ -45,12 +45,58 @@ def info_source(search=" "):
     return result
 
 
+def wiktionary_info(search, unplurify=False):
+    wiktionary_result = {"wikti_defins_1": [],
+                         "wikti_defins_2": [],
+                         "wikti_url": ""}
+
+    WIKTIONARY_URL = 'https://en.wiktionary.org/wiki/'
+
+    definitions = []
+
+    DATA = WiktionaryParser().fetch(search)
+
+    if unplurify:
+        if len(DATA) == 1 and len(DATA[0]['definitions']) == 1 and "plural of" in DATA[0]['definitions'][0]['text'][1]:
+            non_plural = DATA[0]['definitions'][0]['text'][1].replace(
+                "plural of ", "")
+            return non_plural
+        else:
+            return None
+
+    for word in DATA:
+        for word_def in word['definitions']:
+            for defin in word_def['text'][1:]:
+                definitions.append(defin)
+
+    if definitions == []:
+        return {}
+
+    wiktionary_result["wikti_url"] = WIKTIONARY_URL + search
+
+    # Console Debug Teter Code
+    print("Wiktionary title: " + definitions[0])
+    print("Wiktionary title: " + wiktionary_result["wikti_url"])
+
+    defins_num = 3
+
+    if len(definitions) > defins_num:
+        wiktionary_result["wikti_defins_1"] = definitions[:defins_num]
+        wiktionary_result["wikti_defins_2"] = definitions[defins_num:]
+    else:
+        wiktionary_result["wikti_defins_1"] = definitions
+
+    return wiktionary_result
+
+
 def wiki_info(search, pageid=0):
     """ Returns a dictionary with the wikipedia title and main text from the given search term """
 
-    wiki_result = {"wiki_title": "", "wiki_text_brief": "", "wiki_text": []}
+    wiki_result = {"wiki_title": "", "wiki_text_brief": "",
+                   "wiki_text": [], "wiki_url": ""}
 
-    WIKI_URL = "https://en.wikipedia.org/w/api.php"
+    WIKI_API_URL = "https://en.wikipedia.org/w/api.php"
+    WIKI_URL = "https://en.wikipedia.org/wiki/"
     search_limit = 7
     pageids = []
 
@@ -62,7 +108,7 @@ def wiki_info(search, pageid=0):
         'srlimit': search_limit,
         'format': "json"
     }
-    req = requests.get(url=WIKI_URL, params=PARAMS)
+    req = requests.get(url=WIKI_API_URL, params=PARAMS)
     check_url(req)
     DATA = req.json()
     if DATA["query"]["search"] == []:
@@ -76,17 +122,18 @@ def wiki_info(search, pageid=0):
         'pageid': main_id,
         'format': "json"
     }
-    req = requests.get(url=WIKI_URL, params=PARAMS, headers={
+    req = requests.get(url=WIKI_API_URL, params=PARAMS, headers={
                        "User-Agent": "Mozilla/5.0"})
     check_url(req)
     DATA = req.json()
 
     # Add page headert to the result
-    title = DATA["parse"]["title"]
-    wiki_result["wiki_title"] = title
+    wiki_result["wiki_title"] = DATA["parse"]["title"]
+    wiki_result["wiki_url"] = WIKI_URL + wiki_result["wiki_title"]
 
     # Console Debug Teter Code
     print("Wiki title: " + wiki_result["wiki_title"])
+    print(wiki_result["wiki_url"])
 
     # Get the main html from the json url
     parser_output = DATA["parse"]["text"]["*"]
@@ -104,9 +151,12 @@ def wiki_info(search, pageid=0):
             req = requests.get("https://en.wikipedia.org" +
                                new_search, headers={"User-Agent": "Mozilla/5.0"})
             check_url(req)
+            print(req.url)
             soup = bs4.BeautifulSoup(req.text, "html.parser")
             wiki_result["wiki_title"] = soup.find(
                 "h1", id="firstHeading").text
+            wiki_result["wiki_url"] = WIKI_URL + wiki_result["wiki_title"]
+            print(wiki_result["wiki_url"])
             # Console Debug Teter Code
             print("Wiki title: " + wiki_result["wiki_title"])
             main_text = soup.find(class_="mw-parser-output")
@@ -140,7 +190,8 @@ def wiki_info(search, pageid=0):
 
 
 def urban_info(search):
-    urban_result = {"urban_title": "", "urban_text": ""}
+    urban_result = {"urban_title": "", "urban_text_brief": "", "urban_text": [],
+                    "urban_url": "", "urban_example": ""}
     URBAN_API_URL = 'http://api.urbandictionary.com/v0/define?term='
     URBAN_URL = 'https://www.urbandictionary.com/define.php?term='
 
@@ -157,61 +208,37 @@ def urban_info(search):
         return urban_info(close_word)
 
     title = DATA['list'][0]['word'].title()
-    # Console Debug Teter Code
-    print("Urban title: " + title)
+
     urban_result["urban_title"] = title
+    urban_result["urban_url"] = URBAN_URL + title
+
+    # Console Debug Teter Code
+    print("Urban title: " + urban_result["urban_title"])
+    print("Urban url: " + urban_result["urban_url"])
 
     definition = DATA['list'][0]['definition']
-    useless_chars = ['[', ']', '\n', '\r']
+    example = DATA['list'][0]['example']
+
+    useless_chars = ['[', ']', '\r']
     for char in useless_chars:
         definition = definition.replace(char, "")
+        example = example.replace(char, "")
 
-    urban_result["urban_text"] = definition
+    for p in definition.split('\n'):
+        if p != "":
+            urban_result["urban_text"].append(p)
+
+    urban_result["urban_text_brief"] = urban_result["urban_text"][0]
+    urban_result["urban_text"] = urban_result["urban_text"][1:]
+    urban_result["urban_example"] = example
 
     return urban_result
 
 
-def wiktionary_info(search, unplurify=False):
-    wiktionary_result = {"wikti_defins_1": [],
-                         "wikti_defins_2": []}
-    definitions = []
-
-    parser = WiktionaryParser()
-    DATA = parser.fetch(search)
-
-    if unplurify:
-        if len(DATA) == 1 and len(DATA[0]['definitions']) == 1 and "plural of" in DATA[0]['definitions'][0]['text'][1]:
-            non_plural = DATA[0]['definitions'][0]['text'][1].replace(
-                "plural of ", "")
-            return non_plural
-        else:
-            return None
-
-    for word in DATA:
-        for word_def in word['definitions']:
-            for defin in word_def['text'][1:]:
-                definitions.append(defin)
-
-    if definitions == []:
-        return {}
-
-    # Console Debug Teter Code
-    print("Wiktionary title: " + definitions[0])
-
-    defins_num = 3
-
-    if len(definitions) > defins_num:
-        wiktionary_result["wikti_defins_1"] = definitions[:defins_num]
-        wiktionary_result["wikti_defins_2"] = definitions[defins_num:]
-    else:
-        wiktionary_result["wikti_defins_1"] = definitions
-
-    return wiktionary_result
-
-
 def pixabay_info(search):
-    pixabay_result = {"pixabay_images": []}
-    PIXABAY_URL = "https://pixabay.com/api/"
+    pixabay_result = {"pixabay_images": [], "pixabay_url": ""}
+    PIXABAY_API_URL = "https://pixabay.com/api/"
+    PIXABAY_URL = "https://pixabay.com/photos/search/"
     image_limit = 5
 
     # Get a list of page ids from the API
@@ -221,12 +248,15 @@ def pixabay_info(search):
         'image_type': "photo"
     }
 
-    req = requests.get(url=PIXABAY_URL, params=PARAMS)
+    req = requests.get(url=PIXABAY_API_URL, params=PARAMS)
     check_url(req)
     DATA = req.json()
 
     if DATA["hits"] == []:
         return {}
+
+    pixabay_result["pixabay_url"] = PIXABAY_URL + search
+    print("Pixabay url: " + pixabay_result["pixabay_url"])
 
     if len(DATA["hits"]) < image_limit:
         image_limit = len(DATA["hits"])
@@ -272,9 +302,10 @@ def check_url(req):
         return False
 
 
+# info_source(get_word())
 # print(info_source(get_word()))
-# print(info_source("turtlenecks"))
+# print(info_source("dustbowl"))
 # print(wiki_info("monkey"))
-# print(urban_info("tinselly"))
+# print(urban_info("yeet"))
 # print(wiktionary_info("turtlenecks"))
-print(pixabay_info("shootouts"))
+# print(pixabay_info("dustbowl"))

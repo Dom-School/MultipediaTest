@@ -14,11 +14,10 @@
   <form action="" method="POST">
     {% csrf_token %}
 
-    <div class="input-group mb-4">
+    <div class="input-group">
       {{ form.search }}
       <div class="input-group-append">
         <button type="submit" class="btn btn-primary"><i class="fa fa-search"></i></button>
-
         <a class="btn btn btn-danger" href="{% url 'random_page' word=' ' %}" role="button">Random</a>
       </div>
     </div>

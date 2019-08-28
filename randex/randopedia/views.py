@@ -33,6 +33,8 @@ def random_page(request, word=" "):
     if info["no_result"]:
         return redirect('sorry_page', word=word)
 
+    print(info["urban_example"])
+
     return render(request, template_name, info)
 
 
