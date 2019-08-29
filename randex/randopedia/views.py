@@ -10,7 +10,7 @@ def home_page(request):
 
     form = SearchForm(request.POST or None)
     if form.is_valid():
-        return redirect('random_page', word=form.cleaned_data['search'])
+        return redirect('search_result_page', word=form.cleaned_data['search'])
 
     context = {
         "form": form,
@@ -18,13 +18,12 @@ def home_page(request):
     return render(request, template_name, context)
 
 
-def detail_page(request, slug):
-    search = get_object_or_404(Page, slug=slug)
-    template_name = 'randopedia/detail_page.html'
-    return render(request, template_name, {'search': search})
-
-
 def random_page(request, word=" "):
+    word = get_word()
+    return HttpResponseRedirect(reverse('search_result_page', args=[word]))
+
+
+def search_result_page(request, word):
     template_name = 'randopedia/article_page.html'
 
     print(word)

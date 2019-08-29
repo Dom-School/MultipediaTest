@@ -37,7 +37,7 @@ def info_source(search=" "):
     pixabay_dic = pixabay_info(search)
     result.update(pixabay_dic)
 
-    print(result)
+    # print(result)
 
     if len(result) <= 2:
         result["no_result"] = True
@@ -242,17 +242,23 @@ def pixabay_info(search):
     PARAMS = {
         'key': PIXABAY_KEY,
         'q': search,
-        'image_type': "photo"
+        # 'image_type': "photo"
     }
 
-    req = requests.get(url=PIXABAY_API_URL, params=PARAMS)
-    check_url(req)
+    req = requests.get(url=PIXABAY_API_URL, params=PARAMS, timeout=5)
+    # print(req.url)
+    # check_url(req)
+
+    if check_url(req) == False:
+        return {}
+
     DATA = req.json()
 
     if DATA["hits"] == []:
         return {}
 
     pixabay_result["pixabay_url"] = PIXABAY_URL + search
+    print("Pixabay url:" + pixabay_result["pixabay_url"])
 
     if len(DATA["hits"]) < image_limit:
         image_limit = len(DATA["hits"])
@@ -304,4 +310,4 @@ def check_url(req):
 # print(wiki_info("monkey"))
 # print(urban_info("yeet"))
 # print(wiktionary_info("turtlenecks"))
-# print(pixabay_info("dustbowl"))
+# print(pixabay_info("cat"))
