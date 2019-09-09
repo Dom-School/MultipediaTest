@@ -6,7 +6,7 @@ from .search import info_source, get_word
 
 
 def home_page(request):
-    template_name = 'randopedia/search_page.html'
+    template_name = 'multipedia/search_page.html'
 
     form = SearchForm(request.POST or None)
     if form.is_valid():
@@ -24,7 +24,7 @@ def random_page(request, word=" "):
 
 
 def search_result_page(request, word):
-    template_name = 'randopedia/article_page.html'
+    template_name = 'multipedia/article_page.html'
 
     print(word)
     info = info_source(word)
@@ -37,7 +37,7 @@ def search_result_page(request, word):
 
 def sorry_page(request, word=None):
 
-    template_name = 'randopedia/sorry_page.html'
+    template_name = 'multipedia/sorry_page.html'
 
     context = {
         "word": word,
