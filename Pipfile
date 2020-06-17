@@ -4,11 +4,15 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
-pylint = "*"
-rope = "*"
-autopep8 = "*"
 
 [packages]
+django = "*"
+django-widget-tweaks = "*"
+bs4 = "*"
+pypandoc = "*"
+wiktionaryparser = "*"
+randomwordgenerator = "*"
+random-word = "*"
 
 [requires]
-python_version = "3.7"
+python_version = "3.8"
