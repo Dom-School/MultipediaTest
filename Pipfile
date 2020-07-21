@@ -14,6 +14,7 @@ pypandoc = "*"
 wiktionaryparser = "*"
 randomwordgenerator = "*"
 random-word = "*"
+decouple = "*"
 
 [requires]
 python_version = "3.8"
