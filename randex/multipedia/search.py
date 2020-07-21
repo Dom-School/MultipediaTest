@@ -6,9 +6,10 @@ from random import randint
 from wiktionaryparser import WiktionaryParser
 from randomwordgenerator import randomwordgenerator as r_backup
 from random_word import RandomWords
+from decouple import config
 
-WORDNIK_KEY = 'wlaurbdjhhd8uql2fa84x3skvw8g1uw5ffogaozp7sya3zg90'
-PIXABAY_KEY = '13414212-c2d4037cef2af0c68a1150841'
+WORDNIK_KEY = config('WORDNIK_KEY')
+PIXABAY_KEY = config('PIXABAY_KEY')
 
 
 def info_source(search=" "):
@@ -36,8 +37,6 @@ def info_source(search=" "):
 
     pixabay_dic = pixabay_info(search)
     result.update(pixabay_dic)
-
-    # print(result)
 
     if len(result) <= 2:
         result["no_result"] = True
@@ -242,12 +241,9 @@ def pixabay_info(search):
     PARAMS = {
         'key': PIXABAY_KEY,
         'q': search,
-        # 'image_type': "photo"
     }
 
     req = requests.get(url=PIXABAY_API_URL, params=PARAMS, timeout=5)
-    # print(req.url)
-    # check_url(req)
 
     if check_url(req) == False:
         return {}
@@ -273,7 +269,6 @@ def pixabay_info(search):
 def get_word():
     while(True):
         try:
-            # r.get_random_words(hasDictionaryDef="true", includePartOfSpeech="noun,verb", minCorpusCount=1, maxCorpusCount=10, minDictionaryCount=1, maxDictionaryCount=10, minLength=5, maxLength=10, sortBy="alpha", sortOrder="asc", limit=15)
             word = RandomWords().get_random_word(
                 hasDictionaryDef="true", includePartOfSpeech="noun")
         except Exception as exc:
@@ -281,16 +276,6 @@ def get_word():
             word = r_backup.generate_random_words(1)
         print("Random word: " + word)
 
-        """
-        wiki = 'https://en.wikipedia.org/wiki/{}'.format(word)
-        wiki_res = requests.get(wiki)
-        try:
-            wiki_res.raise_for_status()
-            return word
-        except Exception as exc:
-            print('There was a problem: %s' % (exc))
-            continue
-        """
         return word
 
 
@@ -302,12 +287,3 @@ def check_url(req):
     except Exception as exc:
         print('There was a problem: %s' % (exc))
         return False
-
-
-# info_source(get_word())
-# print(info_source(get_word()))
-# print(info_source("dustbowl"))
-# print(wiki_info("monkey"))
-# print(urban_info("yeet"))
-# print(wiktionary_info("turtlenecks"))
-# print(pixabay_info("cat"))
