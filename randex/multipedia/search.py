@@ -168,7 +168,7 @@ def wiki_info(search, pageid=0):
             if tag.style != None:
                 continue
             if tag.sup != None:
-                for i in range(len(tag.find_all("sup"))):
+                for _i in range(len(tag.find_all("sup"))):
                     tag.sup.decompose()
             # wiki_result["wiki_text"] = wiki_result["wiki_text"] +
             wiki_result["wiki_text"].append(tag.text)
