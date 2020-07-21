@@ -13,8 +13,8 @@ bs4 = "*"
 pypandoc = "*"
 wiktionaryparser = "*"
 randomwordgenerator = "*"
-random-word = "*"
-decouple = "*"
+random-word = "*"a
+python-decouple = "*"
 
 [requires]
 python_version = "3.8"
